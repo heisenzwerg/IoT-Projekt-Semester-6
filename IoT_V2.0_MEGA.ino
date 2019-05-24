@@ -882,6 +882,10 @@ BLYNK_WRITE(V8)
   }
 }
 
+int get_durchfluss() {
+  return 60 * dauer_pumpe;
+}
+
 void set_LED(int helligkeit) {
 
   analogWrite(led1, helligkeit);
@@ -924,13 +928,4 @@ void PUMPEN(bool on_off)
     pumpe_on_off = 0;
     Blynk.virtualWrite(V6, 0);
   }
-}
-
-int get_durchfluss() {
-  return 60 * dauer_pumpe;
-}
-
-float get_leistung() {
-
-  return 23 * dauer_pumpe / 10;
 }
