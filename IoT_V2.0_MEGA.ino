@@ -241,8 +241,8 @@ void loop()
   s_rfid = RFID();
   s_rauch = get_rauch();
   s_durchfluss = get_durchfluss();
-  //s_wattstunden = get_power();
-  s_wattstunden1 = get_leistung();
+  s_wattstunden = get_power();
+  //s_wattstunden1 = get_leistung();
 
   s_helligkeit = get_helligkeit();
   s_reed_1 = digitalRead(3);
@@ -348,11 +348,85 @@ BLYNK_WRITE(V3)
   }
 }
 
+BLYNK_WRITE(V6)
+{
+  int pinValue = param.asInt(); // pinValue kann hier beispielsweise deine globale Variable für die Alarmanlage sein (on/off)
+  if (pinValue == 1)            //Bei binären Zuständen
+  {
+    PUMPEN(1);
+  }
+  if (pinValue == 0)
+  {
+    PUMPEN(0);
+  }
+}
+
+BLYNK_WRITE(V7)
+{
+  int pinValue = param.asInt(); // pinValue kann hier beispielsweise deine globale Variable für die Alarmanlage sein (on/off)
+  if (pinValue == 1)            //Bei binären Zuständen
+  {
+    garage(1);
+  }
+  if (pinValue == 0)
+  {
+    garage(0);
+
+  }
+}
+
+BLYNK_WRITE(V8)
+{
+  int pinValue = param.asInt(); // pinValue kann hier beispielsweise deine globale Variable für die Alarmanlage sein (on/off)
+  if (pinValue == 1)            //Bei binären Zuständen
+  {
+    fenster(1);
+  }
+  if (pinValue == 0)
+  {
+    fenster(0);
+
+  }
+}
+
 BLYNK_WRITE(V9)
 {
   int pinValue = param.asInt(); // pinValue kann hier beispielsweise deine globale Variable für die Alarmanlage sein (on/off)
 
   set_LED(pinValue);
+}
+
+void pushDataToCloud()
+{
+  //  char buf_feuchtigkeit[10];
+  //  sprintf(buf_feuchtigkeit, "%d%%", s_feuchtigkeit);
+  //
+  //  char buf_temperatur[10];
+  //  sprintf(buf_temperatur, "%d°C", s_temperatur);
+
+  char buf_uptime[10];
+  if (millis() < 120000) {
+    sprintf(buf_uptime, "%ds", millis() / 1000);
+  }
+  else {
+    sprintf(buf_uptime, "%d min", millis() / 60000);
+  }
+
+  Blynk.virtualWrite(V0, s_temperatur);
+  Blynk.virtualWrite(V2, s_feuchtigkeit);
+  Blynk.virtualWrite(V1, buf_uptime);
+  Blynk.virtualWrite(V4, s_fuellstand);
+  Blynk.virtualWrite(V5, s_wind);
+  Blynk.virtualWrite(V11, s_windrichtung);
+  Blynk.virtualWrite(V12, s_wattstunden1);
+  Blynk.virtualWrite(V13, s_durchfluss);
+  if (s_regen == 0) {
+    Blynk.virtualWrite(V14, "Nein");
+  }
+  else if (s_regen == 1) {
+    Blynk.virtualWrite(V14, "Ja");
+
+  }
 }
 
 void set_alarm(int alarm) {
@@ -409,39 +483,6 @@ void alarm_aktiv(bool aktiv) {
     check_ob_alarm_noetig = 0;
     ist_alarm_aktiv = 0;
     digitalWrite(29, LOW);
-  }
-}
-
-void pushDataToCloud()
-{
-  //  char buf_feuchtigkeit[10];
-  //  sprintf(buf_feuchtigkeit, "%d%%", s_feuchtigkeit);
-  //
-  //  char buf_temperatur[10];
-  //  sprintf(buf_temperatur, "%d°C", s_temperatur);
-
-  char buf_uptime[10];
-  if (millis() < 120000) {
-    sprintf(buf_uptime, "%ds", millis() / 1000);
-  }
-  else {
-    sprintf(buf_uptime, "%d min", millis() / 60000);
-  }
-
-  Blynk.virtualWrite(V0, s_temperatur);
-  Blynk.virtualWrite(V2, s_feuchtigkeit);
-  Blynk.virtualWrite(V1, buf_uptime);
-  Blynk.virtualWrite(V4, s_fuellstand);
-  Blynk.virtualWrite(V5, s_wind);
-  Blynk.virtualWrite(V11, s_windrichtung);
-  Blynk.virtualWrite(V12, s_wattstunden1);
-  Blynk.virtualWrite(V13, s_durchfluss);
-  if (s_regen == 0) {
-    Blynk.virtualWrite(V14, "Nein");
-  }
-  else if (s_regen == 1) {
-    Blynk.virtualWrite(V14, "Ja");
-
   }
 }
 
@@ -839,47 +880,6 @@ void SmartLogic()
     analogWrite(led2, s_helligkeit_led2);
   }
 
-}
-
-BLYNK_WRITE(V6)
-{
-  int pinValue = param.asInt(); // pinValue kann hier beispielsweise deine globale Variable für die Alarmanlage sein (on/off)
-  if (pinValue == 1)            //Bei binären Zuständen
-  {
-    PUMPEN(1);
-  }
-  if (pinValue == 0)
-  {
-    PUMPEN(0);
-  }
-}
-
-BLYNK_WRITE(V7)
-{
-  int pinValue = param.asInt(); // pinValue kann hier beispielsweise deine globale Variable für die Alarmanlage sein (on/off)
-  if (pinValue == 1)            //Bei binären Zuständen
-  {
-    garage(1);
-  }
-  if (pinValue == 0)
-  {
-    garage(0);
-
-  }
-}
-
-BLYNK_WRITE(V8)
-{
-  int pinValue = param.asInt(); // pinValue kann hier beispielsweise deine globale Variable für die Alarmanlage sein (on/off)
-  if (pinValue == 1)            //Bei binären Zuständen
-  {
-    fenster(1);
-  }
-  if (pinValue == 0)
-  {
-    fenster(0);
-
-  }
 }
 
 int get_durchfluss() {
